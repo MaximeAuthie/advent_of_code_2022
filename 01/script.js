@@ -1,4 +1,4 @@
-//! --------- PART 1 ---------
+//! --------- PART 1 --------- !//
 /*
 The Elves take turns writing down the number of Calories contained by the various meals, snacks, rations, etc. that they've brought with them, one item per line.
 Each Elf separates their own inventory from the previous Elf's inventory (if any) by a blank line.
@@ -58,7 +58,7 @@ const maxSum = Math.max(...groupsSum);
 console.log('Plus grande somme : ' + maxSum);
 
 
-//! --------- PART 2 --------- : 
+//! --------- PART 2 --------- !//
 
 /*
 By the time you calculate the answer to the Elves' question, they've already realized that the Elf carrying the most Calories of food might eventually run out of snacks.
