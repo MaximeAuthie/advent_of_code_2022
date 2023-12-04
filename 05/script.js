@@ -20,7 +20,8 @@ move 2 from 2 to 1
 move 1 from 1 to 2
 In this example, there are three stacks of crates. Stack 1 contains two crates: crate Z is on the bottom, and crate N is on top. Stack 2 contains three crates; from bottom to top, they are crates M, C, and D. Finally, stack 3 contains a single crate, P.
 
-Then, the rearrangement procedure is given. In each step of the procedure, a quantity of crates is moved from one stack to a different stack. In the first step of the above rearrangement procedure, one crate is moved from stack 2 to stack 1, resulting in this configuration:
+Then, the rearrangement procedure is given. In each step of the procedure, a quantity of crates is moved from one stack to a different stack.
+In the first step of the above rearrangement procedure, one crate is moved from stack 2 to stack 1, resulting in this configuration:
 
 [D]        
 [N] [C]    
@@ -56,63 +57,111 @@ The Elves just need to know which crate will end up on top of each stack; in thi
 After the rearrangement procedure completes, what crate ends up on top of each stack?
 */
 
-const puzzleInput = `    [D]    
-[N] [C]    
-[Z] [M] [P]
- 1   2   3 
-
-move 1 from 2 to 1
-move 3 from 1 to 3
-move 2 from 2 to 1
-move 1 from 1 to 2`;
-
-
+import { puzzleInput } from "./puzzles.js";
 
 //! Représenter les piles de caisses sous forme d'un tableau de string
 const [stacksPart, instructionsPart] = puzzleInput.split('\n\n');
 const stackRows = stacksPart.split('\n').slice(0, -1);
 const stackRows2 = stackRows.map((row) => [...row].filter((char, index) => index%4 === 1));
 
-
-
 const fillNewArray = (inputArray) =>  {
-    const outputArray = new Array(inputArray.length).fill("");
+    const outputArray = new Array(inputArray[inputArray.length - 1].length).fill("");
     inputArray.map((row, indexRow) => {
-    row.map((char, indexChar) => char !== ' ' ? outputArray[indexChar] += inputArray[indexRow][indexChar] : outputArray[indexChar] += '');
+        row.map((char, indexChar) => char !== ' ' ? outputArray[indexChar] += inputArray[indexRow][indexChar] : '');
     });
     return outputArray;
 }
 
-console.log(fillNewArray(stackRows2));
+const initialStacks = fillNewArray(stackRows2);
 
-//! Fonction pour bouger les caisses d'un pile à une autre 
-const instructions = instructionsPart.split('\n');
-const instructions2 = instructions.map((instruction) => [...instruction].filter((char) => /[1-9]/.test(char)));
+//! Réprésennter les instructions sous formes de tableaux
+const instructionsSplit = instructionsPart.split('\n');
+const instructionsArray = instructionsSplit.map((instruction) => instruction
+    .replace('move ','')
+    .replace(' from ', ',')
+    .replace(' to ', ',')
+    .split(',')
+);
 
-console.log(instructions2);
+//! Fonction pour bouger les caisses d'un pile à une autre
+const moveCrates = ([quantity, startStack, endStack], stacks) => {
+    const [...stacksToMove] = stacks[startStack-1].slice(0, quantity);
+    stacksToMove.map((crate) => {
+        stacks[endStack-1] = crate.concat(stacks[endStack-1]);
+        stacks[startStack-1] = stacks[startStack-1].slice(1);
+    });
+    return stacks;
+}
 
-//! Récupérer la liste des instructions et les exécuter
+//! Exécuter la liste des instructions
+const stacksAfterMoves = instructionsArray.reduce((stacks, instruction) => moveCrates(instruction,stacks) , initialStacks);
+const topStacks = stacksAfterMoves
+    .map((stack) => stack[0])
+    .join('');
 
-
-// console.log(stackRows);
-console.log();
+console.log(`Résultat partie 1 : ${topStacks}`);
 
 
 //! --------- PART 2 --------- !//
 
 /*
-It seems like there is still quite a bit of duplicate work planned. Instead, the Elves would like to know the number of pairs that overlap at all.
+As you watch the crane operator expertly rearrange the crates, you notice the process isn't following your prediction.
 
-In the above example, the first two pairs (2-4,6-8 and 2-3,4-5) don't overlap, while the remaining four pairs (5-7,7-9, 2-8,3-7, 6-6,4-6, and 2-6,4-8) do overlap:
+Some mud was covering the writing on the side of the crane, and you quickly wipe it away. The crane isn't a CrateMover 9000 - it's a CrateMover 9001.
 
-    - 5-7,7-9 overlaps in a single section, 7.
-    - 2-8,3-7 overlaps all of the sections 3 through 7.
-    - 6-6,4-6 overlaps in a single section, 6.
-    - 2-6,4-8 overlaps in sections 4, 5, and 6.
+The CrateMover 9001 is notable for many new and exciting features: air conditioning, leather seats, an extra cup holder, and the ability to pick up and move multiple crates at once.
 
-So, in this example, the number of overlapping assignment pairs is 4.
+Again considering the example above, the crates begin in the same configuration:
 
-In how many assignment pairs do the ranges overlap?
+    [D]    
+[N] [C]    
+[Z] [M] [P]
+ 1   2   3 
+Moving a single crate from stack 2 to stack 1 behaves the same as before:
+
+[D]        
+[N] [C]    
+[Z] [M] [P]
+ 1   2   3 
+However, the action of moving three crates from stack 1 to stack 3 means that those three moved crates stay in the same order, resulting in this new configuration:
+
+        [D]
+        [N]
+    [C] [Z]
+    [M] [P]
+ 1   2   3
+Next, as both crates are moved from stack 2 to stack 1, they retain their order as well:
+
+        [D]
+        [N]
+[C]     [Z]
+[M]     [P]
+ 1   2   3
+Finally, a single crate is still moved from stack 1 to stack 2, but now it's crate C that gets moved:
+
+        [D]
+        [N]
+        [Z]
+[M] [C] [P]
+ 1   2   3
+In this example, the CrateMover 9001 has put the crates in a totally different order: MCD.
+
+Before the rearrangement process finishes, update your simulation so that the Elves know where they should stand to be ready to unload the final supplies. After the rearrangement procedure completes, what crate ends up on top of each stack?
 */
 
-//! Compter le nombre de paires dont les séries de zones se chevauchent au moins en partie
+//! Fonction pour bouger les caisses d'un pile à une autre avec la CrateMover 9001
+const initialStacks9001 = fillNewArray(stackRows2);
+
+const moveCrates9001 = ([quantity, startStack, endStack], stacks) => {
+    const cratesToMove = stacks[startStack-1].slice(0, quantity);
+    stacks[endStack-1] = cratesToMove + stacks[endStack-1];
+    stacks[startStack-1] = stacks[startStack-1].slice(cratesToMove.length);
+    return stacks;
+}
+
+const stacksAfterMoves9001 = instructionsArray.reduce((stacks, instruction) => moveCrates9001(instruction, stacks), initialStacks9001);
+const topStacks9001 = stacksAfterMoves9001
+    .map((stack) => stack[0])
+    .join('')
+
+console.log(`Résultat partie 1 : ${topStacks9001}`);
