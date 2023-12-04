@@ -65,16 +65,23 @@ const stackRows = stacksPart.split('\n').slice(0, -1);
 const stackRows2 = stackRows.map((row) => [...row].filter((char, index) => index%4 === 1));
 
 const fillNewArray = (inputArray) =>  {
+
+    //? Créer un tableau vide avec autant de string que de piles 
     const outputArray = new Array(inputArray[inputArray.length - 1].length).fill("");
+
+    //? Remplir de tableau vide pour reconstituer les piles (colonnes) à partir des lignes
     inputArray.map((row, indexRow) => {
         row.map((char, indexChar) => char !== ' ' ? outputArray[indexChar] += inputArray[indexRow][indexChar] : '');
     });
+
+    //? Retourner le nouveau tableau
     return outputArray;
 }
 
+//? Stocker toutes le contenu initial des piles de caisses dans une constante
 const initialStacks = fillNewArray(stackRows2);
 
-//! Réprésennter les instructions sous formes de tableaux
+//! Réprésennter les instructions sous formes de tableaux [quantité, pile d'origine, pile d'arrivée]
 const instructionsSplit = instructionsPart.split('\n');
 const instructionsArray = instructionsSplit.map((instruction) => instruction
     .replace('move ','')
@@ -85,16 +92,26 @@ const instructionsArray = instructionsSplit.map((instruction) => instruction
 
 //! Fonction pour bouger les caisses d'un pile à une autre
 const moveCrates = ([quantity, startStack, endStack], stacks) => {
-    const [...stacksToMove] = stacks[startStack-1].slice(0, quantity);
-    stacksToMove.map((crate) => {
+
+    //? Récupérer la liste des caisses à déplacer
+    const [...cratesToMove] = stacks[startStack-1].slice(0, quantity);
+
+    //? Pour chaque caisse, la déplacer dans le bon ordre dans la nouvelle pile
+    cratesToMove.map((crate) => {
         stacks[endStack-1] = crate.concat(stacks[endStack-1]);
         stacks[startStack-1] = stacks[startStack-1].slice(1);
     });
+
+    //? Retourner le nouvel agencement des piles de caisses
     return stacks;
 }
 
 //! Exécuter la liste des instructions
+
+//? On exécute la méthode moveCrates pour toute les instructions données (la méthode réduce permet de converver la configuration des piles parès chaque instruction)
 const stacksAfterMoves = instructionsArray.reduce((stacks, instruction) => moveCrates(instruction,stacks) , initialStacks);
+
+//? On récupère la caisse en haut de chaque pile sous forme de string
 const topStacks = stacksAfterMoves
     .map((stack) => stack[0])
     .join('');
@@ -153,15 +170,22 @@ Before the rearrangement process finishes, update your simulation so that the El
 const initialStacks9001 = fillNewArray(stackRows2);
 
 const moveCrates9001 = ([quantity, startStack, endStack], stacks) => {
+
+    //? Récupérer la liste des caisses à déplacer
     const cratesToMove = stacks[startStack-1].slice(0, quantity);
+
+    //? Déplacer les caisses dans l'ordre dans lequel elles ont été attrapées par la grue 9001
     stacks[endStack-1] = cratesToMove + stacks[endStack-1];
     stacks[startStack-1] = stacks[startStack-1].slice(cratesToMove.length);
     return stacks;
 }
 
+//? On exécute la méthode moveCrates pour toute les instructions données (la méthode réduce permet de converver la configuration des piles parès chaque instruction)
 const stacksAfterMoves9001 = instructionsArray.reduce((stacks, instruction) => moveCrates9001(instruction, stacks), initialStacks9001);
+
+//? On récupère la caisse en haut de chaque pile sous forme de string
 const topStacks9001 = stacksAfterMoves9001
     .map((stack) => stack[0])
     .join('')
 
-console.log(`Résultat partie 1 : ${topStacks9001}`);
+console.log(`Résultat partie 2 : ${topStacks9001}`);
